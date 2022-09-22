@@ -5,6 +5,7 @@
 #include "environment.hpp"
 
 #include "simulation/simulation.hpp"
+#include "implicit_surface/implicit_surface.hpp"
 
 using cgp::mesh_drawable;
 
@@ -26,6 +27,8 @@ struct scene_structure : scene_inputs_generic {
 	window_structure window;
 
 	mesh_drawable global_frame;          // The standard global frame
+    mesh_drawable implicit_surface; // The shape of the implicit surface
+    spatial_domain_grid_3D domain;
 	environment_structure environment;   // Standard environment controler
 	input_devices inputs;                // Storage for inputs status (mouse, keyboard, window dimension)
 	gui_parameters gui;                  // Standard GUI element storage

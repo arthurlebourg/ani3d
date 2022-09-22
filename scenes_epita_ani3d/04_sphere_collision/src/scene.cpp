@@ -3,9 +3,6 @@
 
 using namespace cgp;
 
-
-
-
 void scene_structure::initialize()
 {
 	camera_control.initialize(inputs, window); // Give access to the inputs and window global state to the camera controler
@@ -55,6 +52,11 @@ void scene_structure::initialize()
     wall6.p = { 0,0,1 };
     wall6.n = { 0,0,-1 };
     walls.push_back(wall6);
+
+    int3 const samples = { 50, 50, 50 };
+    // Dimension of the domain
+    vec3 const length = { 2,2,2 };
+    domain = spatial_domain_grid_3D::from_center_length({ 0,0,0 }, length, samples);
 }
 
 
@@ -76,8 +78,16 @@ void scene_structure::display_frame()
 	float const dt = 0.01f * timer.scale;
 	simulate(particles, walls, dt);
 
+	grid_3D<float> field = compute_scalar_field(domain, particles);
+
+	// Compute the mesh using marching cube
+    float isovalue = 0.9f;
+	mesh m = marching_cube(field, domain, isovalue);
+	implicit_surface.initialize_data_on_gpu(m);
+    draw(implicit_surface, environment);
 	// Display the result
-	sphere_display();
+	//sphere_display();
+	draw(cube_wireframe, environment);
 
 	if (gui.display_frame)
 		draw(global_frame, environment);
@@ -98,7 +108,6 @@ void scene_structure::sphere_display()
 	}
 
 	// Display the box in which the particles should stay
-	draw(cube_wireframe, environment);
 }
 
 void scene_structure::emit_particle()
