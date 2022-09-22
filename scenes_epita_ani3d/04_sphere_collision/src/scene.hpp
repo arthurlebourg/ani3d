@@ -43,6 +43,9 @@ struct scene_structure : scene_inputs_generic {
 	cgp::mesh_drawable sphere;
 	cgp::curve_drawable cube_wireframe;
 
+    float sigma = 0.1f;
+    float isovalue = 0.05f;
+
 
 	// ****************************** //
 	// Functions

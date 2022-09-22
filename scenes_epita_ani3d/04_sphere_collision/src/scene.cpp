@@ -53,9 +53,9 @@ void scene_structure::initialize()
     wall6.n = { 0,0,-1 };
     walls.push_back(wall6);
 
-    int3 const samples = { 50, 50, 50 };
+    int3 const samples = { 25, 25, 25 };
     // Dimension of the domain
-    vec3 const length = { 2,2,2 };
+    vec3 const length = { 2.5,2.5,2.5 };
     domain = spatial_domain_grid_3D::from_center_length({ 0,0,0 }, length, samples);
 }
 
@@ -78,12 +78,12 @@ void scene_structure::display_frame()
 	float const dt = 0.01f * timer.scale;
 	simulate(particles, walls, dt);
 
-	grid_3D<float> field = compute_scalar_field(domain, particles);
+	grid_3D<float> field = compute_scalar_field(domain, particles, sigma);
 
 	// Compute the mesh using marching cube
-    float isovalue = 0.9f;
 	mesh m = marching_cube(field, domain, isovalue);
 	implicit_surface.initialize_data_on_gpu(m);
+    implicit_surface.material.color = {0,0,1};
     draw(implicit_surface, environment);
 	// Display the result
 	//sphere_display();
@@ -121,7 +121,7 @@ void scene_structure::emit_particle()
 
 		particle_structure particle;
 		particle.p = { 0,0,0 };
-		particle.r = rand_interval(0.08f, 0.16f);
+		particle.r = 0.08f;//rand_interval(0.08f, 0.16f);
 		particle.c = color_lut[int(rand_interval() * color_lut.size())];
 		particle.v = v;
 		particle.m = rand_interval(1.0f, 2.0f); //
@@ -134,6 +134,8 @@ void scene_structure::emit_particle()
 void scene_structure::display_gui()
 {
 	ImGui::Checkbox("Frame", &gui.display_frame);
+	ImGui::SliderFloat("Sigma", &sigma, 0.01f, 2.0f, "%.2f s");
+	ImGui::SliderFloat("Isovalue", &isovalue, 0.01f, 1.0f, "%.2f s");
 	ImGui::SliderFloat("Time scale", &timer.scale, 0.05f, 2.0f, "%.2f s");
 	ImGui::SliderFloat("Time to add new sphere", &timer.event_period, 0.05f, 2.0f, "%.2f s");
 	ImGui::Checkbox("Add sphere", &gui.add_sphere);
