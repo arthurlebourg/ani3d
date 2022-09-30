@@ -1,8 +1,8 @@
 #pragma once
 
 #include "cgp/cgp.hpp"
-
-
+#include <memory>
+#define MAX_DEPTH 8
 
 struct particle_structure
 {
@@ -21,4 +21,30 @@ struct plane_structure
 };
 
 void simulate(std::vector<particle_structure>& particles, std::vector<plane_structure>& walls, float dt);
+
+class Node
+{
+public:
+    Node(cgp::vec3 p, size_t width);
+
+    bool is_leaf();
+
+    std::vector<std::shared_ptr<Node>> get_leaves();
+
+    void add_boule(particle_structure b);
+
+    std::vector<particle_structure> get_boules(cgp::vec3 pos);
+
+    void simulate_opti(float dt, std::vector<plane_structure>& walls);
+
+private:
+    cgp::vec3 p_;
+    size_t width_;
+    std::vector<particle_structure> boules_;
+    std::vector<std::shared_ptr<Node>> children_;
+};
+
+
+
+
 

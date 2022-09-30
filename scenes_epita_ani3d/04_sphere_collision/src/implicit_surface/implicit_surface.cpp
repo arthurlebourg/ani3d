@@ -3,9 +3,9 @@
 
 using namespace cgp;
 
-float field_evaluate(vec3 const& p, std::vector<particle_structure> particles, const float &sigma);
+float field_evaluate(vec3 const& p, Node particles, const float &sigma);
 
-grid_3D<float> compute_scalar_field(spatial_domain_grid_3D const& domain,std::vector<particle_structure> particles,
+grid_3D<float> compute_scalar_field(spatial_domain_grid_3D const& domain, Node particles,
 const float &sigma)
 {
 	grid_3D<float> field;
@@ -37,13 +37,14 @@ float blob(vec3 const& p, vec3 const& p0, const float &sigma)
 }
 
 // Evaluate the field at an arbitrary position in space
-float field_evaluate(vec3 const& p, std::vector<particle_structure> particles, const float &sigma)
+float field_evaluate(vec3 const& p, Node particles, const float &sigma)
 {
 	float value = 0.0f;
-	size_t const N = particles.size();
+	auto particles_vec = particles.get_boules(p);
+	size_t const N = particles_vec.size();
 	for (size_t k = 0; k < N; ++k)
 	{
-		particle_structure const& particle = particles[k];
+		particle_structure const& particle = particles_vec[k];
         value = std::max(value, blob(p,particle.p, sigma));
 	}
 	return value;

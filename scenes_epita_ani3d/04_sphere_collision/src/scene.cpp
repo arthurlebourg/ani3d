@@ -57,9 +57,10 @@ void scene_structure::initialize()
     // Dimension of the domain
     vec3 const length = { 2.5,2.5,2.5 };
     domain = spatial_domain_grid_3D::from_center_length({ 0,0,0 }, length, samples);
+	particles = std::make_shared<Node>(Node({-1,-1,-1}, 2));
 }
 
-
+bool first = false;
 
 void scene_structure::display_frame()
 {
@@ -72,18 +73,21 @@ void scene_structure::display_frame()
 	timer.update();
 
 	// Create a new particle if needed
-	emit_particle();
+	if (!first)
+	{
+		emit_particle();
+	}	
 
 	// Call the simulation of the particle system
 	float const dt = 0.01f * timer.scale;
-	simulate(particles, walls, dt);
-
-	grid_3D<float> field = compute_scalar_field(domain, particles, sigma);
+	//simulate(particles, walls, dt);
+	particles->simulate_opti(dt, walls);
+	grid_3D<float> field = compute_scalar_field(domain, *particles, sigma);
 
 	// Compute the mesh using marching cube
 	mesh m = marching_cube(field, domain, isovalue);
 	implicit_surface.initialize_data_on_gpu(m);
-    implicit_surface.material.color = {0,0,1};
+    implicit_surface.material.color = {0.83/2,0.94/2,0.97};
     draw(implicit_surface, environment);
 	// Display the result
 	//sphere_display();
@@ -92,7 +96,7 @@ void scene_structure::display_frame()
 	if (gui.display_frame)
 		draw(global_frame, environment);
 }
-
+/*
 void scene_structure::sphere_display()
 {
 	// Display the particles as spheres
@@ -109,7 +113,7 @@ void scene_structure::sphere_display()
 
 	// Display the box in which the particles should stay
 }
-
+*/
 void scene_structure::emit_particle()
 {
 	// Emit particle with random velocity
@@ -117,16 +121,18 @@ void scene_structure::emit_particle()
 	static numarray<vec3> const color_lut = { {1,0,0},{0,1,0},{0,0,1},{1,1,0},{1,0,1},{0,1,1} };
 	if (timer.event && gui.add_sphere) {
 		float const theta = rand_interval(0, 2 * Pi);
-		vec3 const v = vec3(1.0f * std::cos(theta), 1.0f * std::sin(theta), 4.0f);
+		vec3 const v = vec3(1.0f * std::cos(theta), 4.0f, 1.0f * std::sin(theta));
 
 		particle_structure particle;
 		particle.p = { 0,0,0 };
 		particle.r = 0.08f;//rand_interval(0.08f, 0.16f);
 		particle.c = color_lut[int(rand_interval() * color_lut.size())];
 		particle.v = v;
-		particle.m = rand_interval(1.0f, 2.0f); //
+		particle.m = rand_interval(1.0f, 2.0f);
 
-		particles.push_back(particle);
+		//particles.push_back(particle);
+		std::cout << "added boule" << std::endl;
+		particles->add_boule(particle);
 	}
 }
 
