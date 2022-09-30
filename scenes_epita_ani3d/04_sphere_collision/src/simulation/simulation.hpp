@@ -35,7 +35,7 @@ public:
 
     std::vector<particle_structure> get_boules(cgp::vec3 pos);
 
-    void simulate_opti(float dt, std::vector<plane_structure>& walls);
+    void simulate_opti(float dt, std::vector<plane_structure>& walls, std::shared_ptr<Node> head);
 
 private:
     cgp::vec3 p_;

@@ -131,7 +131,7 @@ void collision_boules(particle_structure &boule1, particle_structure &boule2)
     }
 }
 
-void Node::simulate_opti(float dt, std::vector<plane_structure>& walls)
+void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::shared_ptr<Node> head)
 {
     for (auto i : children_)
     {
@@ -143,10 +143,16 @@ void Node::simulate_opti(float dt, std::vector<plane_structure>& walls)
         if (i->is_leaf())
         {
             simulate(i->boules_, walls, dt);
+            for (auto child : boules_)
+            {
+                head->add_boule(child);
+            }
+            i->children_.empty();
+            // move boules in the octree, their location changed
         }
         else
         {
-            i->simulate_opti(dt, walls);
+            i->simulate_opti(dt, walls, head);
         }
     }
 }
