@@ -25,11 +25,13 @@ void simulate(std::vector<particle_structure>& particles, std::vector<plane_stru
 class Node
 {
 public:
-    Node(cgp::vec3 p, size_t width);
+    Node(cgp::vec3 p, float width);
 
     bool is_leaf();
 
     std::vector<std::shared_ptr<Node>> get_leaves();
+
+    bool is_inside_cube(particle_structure b);
 
     void add_boule(particle_structure b);
 
@@ -39,7 +41,7 @@ public:
 
 private:
     cgp::vec3 p_;
-    size_t width_;
+    float width_;
     std::vector<particle_structure> boules_;
     std::vector<std::shared_ptr<Node>> children_;
 };

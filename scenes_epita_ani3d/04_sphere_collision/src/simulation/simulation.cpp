@@ -2,7 +2,7 @@
 
 using namespace cgp;
 
-Node::Node(cgp::vec3 p, size_t width)
+Node::Node(cgp::vec3 p, float width)
     : p_(p)
     , width_(width) 
 {
@@ -42,8 +42,28 @@ std::vector<std::shared_ptr<Node>> Node::get_leaves()
     return nodes;
 }
 
+bool Node::is_inside_cube(particle_structure b)
+{
+    if (b.p.x < p_.x || b.p.y < p_.y || b.p.z < p_.z)
+    {
+        return false;
+    }
+    if (b.p.x > p_.x + width_ || b.p.y > p_.y + width_ || b.p.z > p_.z + width_)
+    {
+        return false;
+    }
+    return true;
+}
+
 void Node::add_boule(particle_structure b)
 {
+    if (!is_inside_cube(b))
+    {
+        /*std::cout << "ERROR" << std::endl;
+        std::cout << "particule: " << b.p << std::endl;
+        std::cout << "cube: " << p_ << std::endl;
+        std::cout << "width: " << width_ << std::endl;*/
+    }
     size_t i = 0;
     if (b.p.x > p_.x + width_/2)
         i+=1;
@@ -55,6 +75,13 @@ void Node::add_boule(particle_structure b)
     if (is_leaf())
     {
         size_t n = boules_.size();
+        if (width_ >= 0.5)
+        {
+            std::cout << "cube: " << p_ << std::endl;
+            std::cout << "boules_ size: " << n << std::endl;
+            std::cout << "width: " << width_ << std::endl;
+            std::cout << "particle: " << b.p << std::endl << std::endl;
+        }
         if (n < 8)
         {   
             boules_.push_back(b);
@@ -64,10 +91,10 @@ void Node::add_boule(particle_structure b)
                 {
                     add_boule(child);
                 }
-                children_.empty();
+                boules_.clear();
             }
+            return;
         }
-        return;
     }
     if (children_[i] == nullptr)
     {
@@ -78,8 +105,14 @@ void Node::add_boule(particle_structure b)
             pos.y += width_/2;
         if (b.p.z > p_.z + width_/2)
             pos.z += width_/2;
-        auto node = std::make_shared<Node>(Node(pos, width_/2));
-        children_[i] = node;
+        if (width_ != 0 && false)
+        {
+            std::cout << "cube: " << p_ << std::endl;
+            std::cout << "width: " << width_ << std::endl;
+            std::cout << "particle: " << b.p << std::endl;
+            std::cout << "pos: " << pos << std::endl << std::endl;
+        }
+        children_[i] = std::make_shared<Node>(Node(pos, width_/2));
     }
     children_[i]->add_boule(b);
 }

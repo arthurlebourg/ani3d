@@ -131,6 +131,7 @@ void scene_structure::emit_particle()
 		particle.m = rand_interval(1.0f, 2.0f);
 
 		//particles.push_back(particle);
+		std::cout << "BOULE" << std::endl;
 		particles->add_boule(particle);
 	}
 }
