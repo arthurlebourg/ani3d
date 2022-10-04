@@ -122,7 +122,7 @@ void scene_structure::emit_particle()
 	static numarray<vec3> const color_lut = { {1,0,0},{0,1,0},{0,0,1},{1,1,0},{1,0,1},{0,1,1} };
 	if (timer.event && gui.add_sphere) {
 		float const theta = rand_interval(0, 2 * Pi);
-		vec3 const v = vec3(1.0f * std::cos(theta), 4.0f, 1.0f * std::sin(theta));
+		vec3 const v = vec3(1.0f * std::cos(theta), 1.0f * std::sin(theta), 4.0f );
 
 		particle_structure particle;
 		particle.p = { 0,0,0 };
