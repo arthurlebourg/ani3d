@@ -81,6 +81,7 @@ void scene_structure::display_frame()
 	// Call the simulation of the particle system
 	float const dt = 0.01f * timer.scale;
 	//simulate(particles, walls, dt);
+
 	particles->simulate_opti(dt, walls, particles);
 	grid_3D<float> field = compute_scalar_field(domain, *particles, sigma);
 
@@ -131,7 +132,6 @@ void scene_structure::emit_particle()
 		particle.m = rand_interval(1.0f, 2.0f);
 
 		//particles.push_back(particle);
-		std::cout << "BOULE" << std::endl;
 		particles->add_boule(particle);
 	}
 }

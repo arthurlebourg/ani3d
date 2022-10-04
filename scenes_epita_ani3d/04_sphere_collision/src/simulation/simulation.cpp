@@ -59,10 +59,10 @@ void Node::add_boule(particle_structure b)
 {
     if (!is_inside_cube(b))
     {
-        /*std::cout << "ERROR" << std::endl;
+        std::cout << "ERROR" << std::endl;
         std::cout << "particule: " << b.p << std::endl;
         std::cout << "cube: " << p_ << std::endl;
-        std::cout << "width: " << width_ << std::endl;*/
+        std::cout << "width: " << width_ << std::endl;
     }
     size_t i = 0;
     if (b.p.x > p_.x + width_/2)
@@ -75,13 +75,6 @@ void Node::add_boule(particle_structure b)
     if (is_leaf())
     {
         size_t n = boules_.size();
-        if (width_ >= 0.5)
-        {
-            std::cout << "cube: " << p_ << std::endl;
-            std::cout << "boules_ size: " << n << std::endl;
-            std::cout << "width: " << width_ << std::endl;
-            std::cout << "particle: " << b.p << std::endl << std::endl;
-        }
         if (n < 8)
         {   
             boules_.push_back(b);
@@ -105,13 +98,7 @@ void Node::add_boule(particle_structure b)
             pos.y += width_/2;
         if (b.p.z > p_.z + width_/2)
             pos.z += width_/2;
-        if (width_ != 0 && false)
-        {
-            std::cout << "cube: " << p_ << std::endl;
-            std::cout << "width: " << width_ << std::endl;
-            std::cout << "particle: " << b.p << std::endl;
-            std::cout << "pos: " << pos << std::endl << std::endl;
-        }
+
         children_[i] = std::make_shared<Node>(Node(pos, width_/2));
     }
     children_[i]->add_boule(b);
@@ -166,6 +153,19 @@ void collision_boules(particle_structure &boule1, particle_structure &boule2)
 
 void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::shared_ptr<Node> head)
 {
+    if (is_leaf())
+    {
+        simulate(boules_, walls, dt);
+        for (size_t a = 0; a < boules_.size(); a++)
+        {
+            if (!is_inside_cube(boules_[a]))
+            {
+                auto boul = boules_[a];
+                boules_.erase(boules_.begin() + a);
+                head->add_boule(boul);
+            }
+        }
+    }
     for (auto i : children_)
     {
         if (i == nullptr)
@@ -176,12 +176,15 @@ void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::sha
         if (i->is_leaf())
         {
             simulate(i->boules_, walls, dt);
-            for (auto child : boules_)
+            for (size_t a = 0; a < i->boules_.size(); a++)
             {
-                head->add_boule(child);
+                if (!i->is_inside_cube(i->boules_[a]))
+                {
+                    auto boul = i->boules_[a];
+                    i->boules_.erase(i->boules_.begin() + a);
+                    head->add_boule(boul);
+                }
             }
-            i->children_.empty();
-            // move boules in the octree, their location changed
         }
         else
         {
