@@ -107,10 +107,6 @@ void Node::add_boule(particle_structure b)
 
 std::vector<particle_structure> Node::get_boules(cgp::vec3 pos)
 {
-    if (is_leaf())
-    {
-        return boules_;
-    }
     size_t i = 0;
     if (pos.x > p_.x + width_/2)
         i+=1;
@@ -125,6 +121,29 @@ std::vector<particle_structure> Node::get_boules(cgp::vec3 pos)
     }
 
     return children_[i]->get_boules(pos);
+}
+
+std::vector<particle_structure> Node::get_boules()
+{
+    std::vector<particle_structure> res;
+    for (auto b : boules_)
+    {
+        res.push_back(b);
+    }
+    for (auto i : children_)
+    {
+        if (i == nullptr)
+        {
+            continue;
+        }
+        auto tmp = i->get_boules();
+        for (auto b : tmp)
+        {
+            res.push_back(b);
+        }
+    }
+
+    return res;
 }
 
 void collision_boules(particle_structure &boule1, particle_structure &boule2)

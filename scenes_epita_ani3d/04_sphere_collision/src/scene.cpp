@@ -89,22 +89,23 @@ void scene_structure::display_frame()
 	mesh m = marching_cube(field, domain, isovalue);
 	implicit_surface.initialize_data_on_gpu(m);
     implicit_surface.material.color = {0.83/2,0.94/2,0.97};
-    draw(implicit_surface, environment);
+    //draw(implicit_surface, environment);
 	// Display the result
-	//sphere_display();
+	sphere_display();
 	draw(cube_wireframe, environment);
 
 	if (gui.display_frame)
 		draw(global_frame, environment);
 }
-/*
+
 void scene_structure::sphere_display()
 {
 	// Display the particles as spheres
-	size_t const N = particles.size();
+	auto tmp = particles->get_boules();
+	size_t const N = tmp.size();
 	for (size_t k = 0; k < N; ++k)
 	{
-		particle_structure const& particle = particles[k];
+		particle_structure const& particle = tmp[k];
 		sphere.material.color = particle.c;
 		sphere.model.translation = particle.p;
 		sphere.model.scaling = particle.r;
@@ -114,7 +115,7 @@ void scene_structure::sphere_display()
 
 	// Display the box in which the particles should stay
 }
-*/
+
 void scene_structure::emit_particle()
 {
 	// Emit particle with random velocity

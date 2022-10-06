@@ -63,7 +63,7 @@ struct scene_structure : scene_inputs_generic {
 
 	void emit_particle();
 	void simulation_step(float dt);
-	//void sphere_display();
+	void sphere_display();
 };
 
 
