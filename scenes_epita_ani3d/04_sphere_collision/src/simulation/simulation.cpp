@@ -76,10 +76,10 @@ void Node::add_boule(particle_structure b)
     if (is_leaf())
     {
         size_t n = boules_.size();
-        if (n < 8)
+        if (n < boules_per_cube_)
         {   
             boules_.push_back(b);
-            if (n == 7)
+            if (n == boules_per_cube_ - 1)
             {
                 for (auto child : boules_)
                 {

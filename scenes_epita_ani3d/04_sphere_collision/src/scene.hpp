@@ -14,6 +14,7 @@ struct gui_parameters {
 	bool display_frame = true;
 	bool add_sphere = true;
 	bool move_box = false;
+	bool marching_cube = true;
 };
 
 // The structure of the custom scene

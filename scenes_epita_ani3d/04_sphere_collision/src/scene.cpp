@@ -89,9 +89,15 @@ void scene_structure::display_frame()
 	mesh m = marching_cube(field, domain, isovalue);
 	implicit_surface.initialize_data_on_gpu(m);
     implicit_surface.material.color = {0.83/2,0.94/2,0.97};
-    //draw(implicit_surface, environment);
-	// Display the result
-	sphere_display();
+	if (gui.marching_cube)
+	{
+		draw(implicit_surface, environment);
+
+	}
+	else
+	{
+		sphere_display();
+	}
 	draw(cube_wireframe, environment);
 
 	if (gui.display_frame)
@@ -147,6 +153,7 @@ void scene_structure::display_gui()
 	ImGui::SliderFloat("Time to add new sphere", &timer.event_period, 0.05f, 2.0f, "%.2f s");
 	ImGui::Checkbox("Add sphere", &gui.add_sphere);
 	ImGui::Checkbox("Move box", &gui.move_box);
+	ImGui::Checkbox("Marching cube", &gui.marching_cube);
 }
 
 void scene_structure::mouse_move_event()
