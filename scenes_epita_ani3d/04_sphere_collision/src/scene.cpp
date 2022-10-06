@@ -55,9 +55,9 @@ void scene_structure::initialize()
 
     int3 const samples = { 25, 25, 25 };
     // Dimension of the domain
-    vec3 const length = { 2.5,2.5,2.5 };
+    vec3 const length = { 3, 3, 3 };
     domain = spatial_domain_grid_3D::from_center_length({ 0,0,0 }, length, samples);
-	particles = std::make_shared<Node>(Node({-1,-1,-1}, 2));
+	particles = std::make_shared<Node>(Node({-2.5,-2.5,-2.5}, 5));
 }
 
 bool first = false;

@@ -62,7 +62,8 @@ void Node::add_boule(particle_structure b)
         std::cout << "ERROR" << std::endl;
         std::cout << "particule: " << b.p << std::endl;
         std::cout << "cube: " << p_ << std::endl;
-        std::cout << "width: " << width_ << std::endl;
+        std::cout << "width: " << width_ << std::endl << std::endl;
+        return;
     }
     size_t i = 0;
     if (b.p.x > p_.x + width_/2)
@@ -171,20 +172,6 @@ void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::sha
         if (i == nullptr)
         {
             continue;
-        }
-
-        if (i->is_leaf())
-        {
-            simulate(i->boules_, walls, dt);
-            for (size_t a = 0; a < i->boules_.size(); a++)
-            {
-                if (!i->is_inside_cube(i->boules_[a]))
-                {
-                    auto boul = i->boules_[a];
-                    i->boules_.erase(i->boules_.begin() + a);
-                    head->add_boule(boul);
-                }
-            }
         }
         else
         {
