@@ -81,10 +81,10 @@ void scene_structure::display_frame()
 	// Call the simulation of the particle system
 	//simulate(particles, walls, dt);
 	std::vector<particle_structure> buffer;
-	particles->simulate_opti(dt, walls, buffer);
+	particles->simulate_opti(dt, walls, buffer, particles);
 	for (auto i : buffer)
 	{
-		particles->add_boule(i, walls, dt);
+		particles->add_boule(i, walls, dt, particles);
 	}
 	grid_3D<float> field = compute_scalar_field(domain, *particles, sigma);
 
@@ -142,7 +142,7 @@ void scene_structure::emit_particle(std::vector<plane_structure>& walls, float d
 		particle.m = rand_interval(1.0f, 2.0f);
 
 		//particles.push_back(particle);
-		particles->add_boule(particle, walls, dt);
+		particles->add_boule(particle, walls, dt, particles);
 	}
 }
 

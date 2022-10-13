@@ -56,7 +56,20 @@ bool Node::is_inside_cube(particle_structure b)
     return true;
 }
 
-void Node::add_boule(particle_structure b, std::vector<plane_structure>& walls, float dt)
+bool Node::is_inside_cube(cgp::vec3 b)
+{
+    if (b.x < p_.x || b.y < p_.y || b.z < p_.z)
+    {
+        return false;
+    }
+    if (b.x > p_.x + width_ || b.y > p_.y + width_ || b.z > p_.z + width_)
+    {
+        return false;
+    }
+    return true;
+}
+
+void Node::add_boule(particle_structure b, std::vector<plane_structure>& walls, float dt, std::shared_ptr<Node> head)
 {
     if (!is_inside_cube(b))
     {
@@ -79,14 +92,14 @@ void Node::add_boule(particle_structure b, std::vector<plane_structure>& walls, 
         size_t n = boules_.size();
         if (n < boules_per_cube_)
         {   
-            simulate(boules_, walls, dt);
             boules_.push_back(b);
-            simulate(boules_, walls, dt);
+            simulate(boules_, head, width_, walls, dt);
+
             if (n == boules_per_cube_ - 1)
             {
                 for (auto child : boules_)
                 {
-                    add_boule(child, walls, dt);
+                    add_boule(child, walls, dt, head);
                 }
                 boules_.clear();
             }
@@ -105,7 +118,33 @@ void Node::add_boule(particle_structure b, std::vector<plane_structure>& walls, 
 
         children_[i] = std::make_shared<Node>(Node(pos, width_/2));
     }
-    children_[i]->add_boule(b,walls, dt);
+    children_[i]->add_boule(b, walls, dt, head);
+}
+
+std::vector<particle_structure> Node::get_voisins(cgp::vec3 pos, int width)
+{
+    if (!is_inside_cube(pos))
+    {
+        return boules_;
+    }
+    if (width == width_)
+    {
+        return get_boules();
+    }
+    size_t i = 0;
+    if (pos.x > p_.x + width_/2)
+        i+=1;
+    if (pos.y > p_.y + width_/2)
+        i+=2;
+    if (pos.z > p_.z + width_/2)
+        i+=4;
+    
+    if (children_[i] == nullptr)
+    {
+        return boules_;
+    }
+
+    return children_[i]->get_boules(pos);
 }
 
 std::vector<particle_structure> Node::get_boules(cgp::vec3 pos)
@@ -177,11 +216,11 @@ void collision_boules(particle_structure &boule1, particle_structure &boule2)
     }
 }
 
-void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::vector<particle_structure> &head)
+void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::vector<particle_structure> &buffer, std::shared_ptr<Node> head)
 {
     if (is_leaf())
     {
-        simulate(boules_, walls, dt);
+        simulate(boules_, head, width_, walls, dt);
         std::vector<particle_structure> tmp;
         for (size_t a = 0; a < boules_.size(); a++)
         {
@@ -189,7 +228,7 @@ void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::vec
             if (!is_inside_cube(boul))
             {
                 //boules_.erase(boules_.begin() + a);
-                head.push_back(boul);
+                buffer.push_back(boul);
             }
             else
             {
@@ -206,15 +245,48 @@ void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::vec
     {
         if (i != nullptr)
         {
-            i->simulate_opti(dt, walls, head);
+            i->simulate_opti(dt, walls, buffer, head);
         }
     }
 }
 
-void simulate(std::vector<particle_structure>& particles, std::vector<plane_structure>& walls, float dt)
+void simulate(std::vector<particle_structure>& particles, std::shared_ptr<Node> head, float width, std::vector<plane_structure>& walls, float dt)
 {
-	vec3 const g = { 0,0,-9.81f };
 	size_t const N = particles.size();
+    if (N == 0)
+    {
+        return;
+    }
+    cgp::vec3 p_ = particles[0].p;
+    auto up = head->get_voisins(vec3(p_.x, p_.y + width, p_.z), width);
+    auto down = head->get_voisins(vec3(p_.x, p_.y - width, p_.z), width);
+
+    auto left = head->get_voisins(vec3(p_.x + width, p_.y, p_.z), width);
+    auto right = head->get_voisins(vec3(p_.x - width, p_.y, p_.z), width);
+
+    auto front = head->get_voisins(vec3(p_.x, p_.y, p_.z + width), width);
+    auto back = head->get_voisins(vec3(p_.x, p_.y, p_.z + width), width);
+
+    std::vector<particle_structure> voisins;
+    for (auto n : up)
+        voisins.push_back(n);
+    for (auto n : down)
+        voisins.push_back(n);
+    for (auto n : left)
+        voisins.push_back(n);
+    for (auto n : right)
+        voisins.push_back(n);
+    for (auto n : left)
+        voisins.push_back(n);
+    for (auto n : front)
+        voisins.push_back(n);
+    for (auto n : back)
+    {
+        voisins.push_back(n);
+    }
+	vec3 const g = { 0,0,-9.81f };
+    size_t const N_voisins = voisins.size();
+
 	for (size_t k = 0; k < N; ++k)
 	{
 		particle_structure& particle = particles[k];
@@ -257,6 +329,13 @@ void simulate(std::vector<particle_structure>& particles, std::vector<plane_stru
             particle_structure& other = particles[i];
             collision_boules(particle, other);
         }
+        for (size_t i = 0; i < N_voisins; ++i)
+        {
+            particle_structure& other = voisins[i];
+            collision_boules(particle, other);
+
+        }
+
 
     }
 

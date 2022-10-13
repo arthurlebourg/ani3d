@@ -20,7 +20,6 @@ struct plane_structure
     cgp::vec3 n;
 };
 
-void simulate(std::vector<particle_structure>& particles, std::vector<plane_structure>& walls, float dt);
 
 class Node
 {
@@ -32,14 +31,18 @@ public:
     std::vector<std::shared_ptr<Node>> get_leaves();
 
     bool is_inside_cube(particle_structure b);
+    bool is_inside_cube(cgp::vec3 b);
 
-    void add_boule(particle_structure b, std::vector<plane_structure>& walls, float dt);
+
+    void add_boule(particle_structure b, std::vector<plane_structure>& walls, float dt, std::shared_ptr<Node> head);
+
+    std::vector<particle_structure> get_voisins(cgp::vec3 pos, int width);
 
     std::vector<particle_structure> get_boules(cgp::vec3 pos);
     std::vector<particle_structure> get_boules();
 
 
-    void simulate_opti(float dt, std::vector<plane_structure>& walls, std::vector<particle_structure> &head);
+    void simulate_opti(float dt, std::vector<plane_structure>& walls, std::vector<particle_structure> &buffer, std::shared_ptr<Node> head);
 
 private:
     cgp::vec3 p_;
@@ -52,6 +55,7 @@ private:
     size_t boules_per_cube_ = 20;
 };
 
+void simulate(std::vector<particle_structure>& particles, std::shared_ptr<Node> head, float width, std::vector<plane_structure>& walls, float dt);
 
 
 
