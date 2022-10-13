@@ -71,18 +71,21 @@ void scene_structure::display_frame()
 		draw(global_frame, environment);
 
 	timer.update();
-
+	float const dt = 0.01f * timer.scale;
 	// Create a new particle if needed
 	if (!first)
 	{
-		emit_particle();
+		emit_particle(walls, dt);
 	}	
 
 	// Call the simulation of the particle system
-	float const dt = 0.01f * timer.scale;
 	//simulate(particles, walls, dt);
-
-	particles->simulate_opti(dt, walls, particles);
+	std::vector<particle_structure> buffer;
+	particles->simulate_opti(dt, walls, buffer);
+	for (auto i : buffer)
+	{
+		particles->add_boule(i, walls, dt);
+	}
 	grid_3D<float> field = compute_scalar_field(domain, *particles, sigma);
 
 	// Compute the mesh using marching cube
@@ -122,7 +125,7 @@ void scene_structure::sphere_display()
 	// Display the box in which the particles should stay
 }
 
-void scene_structure::emit_particle()
+void scene_structure::emit_particle(std::vector<plane_structure>& walls, float dt)
 {
 	// Emit particle with random velocity
 	//  Assume first that all particles have the same radius and mass
@@ -134,12 +137,12 @@ void scene_structure::emit_particle()
 		particle_structure particle;
 		particle.p = { 0,0,0 };
 		particle.r = 0.08f;//rand_interval(0.08f, 0.16f);
-		particle.c = color_lut[int(rand_interval() * color_lut.size())];
+		//particle.c = color_lut[1];
 		particle.v = v;
 		particle.m = rand_interval(1.0f, 2.0f);
 
 		//particles.push_back(particle);
-		particles->add_boule(particle);
+		particles->add_boule(particle, walls, dt);
 	}
 }
 

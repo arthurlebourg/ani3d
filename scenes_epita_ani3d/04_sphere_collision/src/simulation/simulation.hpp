@@ -33,19 +33,21 @@ public:
 
     bool is_inside_cube(particle_structure b);
 
-    void add_boule(particle_structure b);
+    void add_boule(particle_structure b, std::vector<plane_structure>& walls, float dt);
 
     std::vector<particle_structure> get_boules(cgp::vec3 pos);
     std::vector<particle_structure> get_boules();
 
 
-    void simulate_opti(float dt, std::vector<plane_structure>& walls, std::shared_ptr<Node> head);
+    void simulate_opti(float dt, std::vector<plane_structure>& walls, std::vector<particle_structure> &head);
 
 private:
     cgp::vec3 p_;
     float width_;
     std::vector<particle_structure> boules_;
     std::vector<std::shared_ptr<Node>> children_;
+    int _color_index;
+    
 
     size_t boules_per_cube_ = 20;
 };

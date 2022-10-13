@@ -62,7 +62,7 @@ struct scene_structure : scene_inputs_generic {
 	void keyboard_event();
 	void idle_frame();
 
-	void emit_particle();
+	void emit_particle(std::vector<plane_structure>& walls, float dt);
 	void simulation_step(float dt);
 	void sphere_display();
 };

@@ -5,6 +5,7 @@ using namespace cgp;
 Node::Node(cgp::vec3 p, float width)
     : p_(p)
     , width_(width) 
+    , _color_index(int(rand_interval() * 8))
 {
     children_ = std::vector<std::shared_ptr<Node>>(8, nullptr);
 }
@@ -55,7 +56,7 @@ bool Node::is_inside_cube(particle_structure b)
     return true;
 }
 
-void Node::add_boule(particle_structure b)
+void Node::add_boule(particle_structure b, std::vector<plane_structure>& walls, float dt)
 {
     if (!is_inside_cube(b))
     {
@@ -78,12 +79,14 @@ void Node::add_boule(particle_structure b)
         size_t n = boules_.size();
         if (n < boules_per_cube_)
         {   
+            simulate(boules_, walls, dt);
             boules_.push_back(b);
+            simulate(boules_, walls, dt);
             if (n == boules_per_cube_ - 1)
             {
                 for (auto child : boules_)
                 {
-                    add_boule(child);
+                    add_boule(child, walls, dt);
                 }
                 boules_.clear();
             }
@@ -102,7 +105,7 @@ void Node::add_boule(particle_structure b)
 
         children_[i] = std::make_shared<Node>(Node(pos, width_/2));
     }
-    children_[i]->add_boule(b);
+    children_[i]->add_boule(b,walls, dt);
 }
 
 std::vector<particle_structure> Node::get_boules(cgp::vec3 pos)
@@ -126,8 +129,10 @@ std::vector<particle_structure> Node::get_boules(cgp::vec3 pos)
 std::vector<particle_structure> Node::get_boules()
 {
     std::vector<particle_structure> res;
+    static numarray<vec3> const color_lut = { {0,0,0},{0,0,1},{0,1,0},{0,1,1},{1,0,0},{1,0,1},{1,1,0},{1,1,1} };
     for (auto b : boules_)
     {
+        b.c = color_lut[_color_index];
         res.push_back(b);
     }
     for (auto i : children_)
@@ -136,6 +141,7 @@ std::vector<particle_structure> Node::get_boules()
         {
             continue;
         }
+
         auto tmp = i->get_boules();
         for (auto b : tmp)
         {
@@ -171,28 +177,34 @@ void collision_boules(particle_structure &boule1, particle_structure &boule2)
     }
 }
 
-void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::shared_ptr<Node> head)
+void Node::simulate_opti(float dt, std::vector<plane_structure>& walls, std::vector<particle_structure> &head)
 {
     if (is_leaf())
     {
         simulate(boules_, walls, dt);
+        std::vector<particle_structure> tmp;
         for (size_t a = 0; a < boules_.size(); a++)
         {
-            if (!is_inside_cube(boules_[a]))
+            auto boul = boules_[a];
+            if (!is_inside_cube(boul))
             {
-                auto boul = boules_[a];
-                boules_.erase(boules_.begin() + a);
-                head->add_boule(boul);
+                //boules_.erase(boules_.begin() + a);
+                head.push_back(boul);
             }
+            else
+            {
+                tmp.push_back(boul);
+            }
+        }
+        boules_.clear();
+        for (auto i : tmp)
+        {
+            boules_.push_back(i);
         }
     }
     for (auto i : children_)
     {
-        if (i == nullptr)
-        {
-            continue;
-        }
-        else
+        if (i != nullptr)
         {
             i->simulate_opti(dt, walls, head);
         }
