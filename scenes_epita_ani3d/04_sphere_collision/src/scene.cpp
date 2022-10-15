@@ -129,14 +129,13 @@ void scene_structure::emit_particle(std::vector<plane_structure>& walls, float d
 {
 	// Emit particle with random velocity
 	//  Assume first that all particles have the same radius and mass
-	static numarray<vec3> const color_lut = { {1,0,0},{0,1,0},{0,0,1},{1,1,0},{1,0,1},{0,1,1} };
 	if (timer.event && gui.add_sphere) {
 		float const theta = rand_interval(0, 2 * Pi);
 		vec3 const v = vec3(1.0f * std::cos(theta), 1.0f * std::sin(theta), 4.0f );
 
 		particle_structure particle;
 		particle.p = { 0,0,0 };
-		particle.r = 0.08f;//rand_interval(0.08f, 0.16f);
+		particle.r = 0.1f;//rand_interval(0.08f, 0.16f);
 		//particle.c = color_lut[1];
 		particle.v = v;
 		particle.m = rand_interval(1.0f, 2.0f);
