@@ -31,7 +31,6 @@ const float &sigma)
 float blob(vec3 const& p, vec3 const& p0, const float &sigma)
 {
 	float const d = norm(p - p0);
-	//float const value = 1 - sqrt(d);
 	float const value = exp(-(d*d)/(sigma*sigma));
 	return value;
 }

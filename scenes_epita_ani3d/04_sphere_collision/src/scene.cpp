@@ -53,7 +53,8 @@ void scene_structure::initialize()
     wall6.n = { 0,0,-1 };
     walls.push_back(wall6);
 
-    int3 const samples = { 25, 25, 25 };
+	int samp = 50;
+    int3 const samples = { samp, samp, samp };
     // Dimension of the domain
     vec3 const length = { 3, 3, 3 };
     domain = spatial_domain_grid_3D::from_center_length({ 0,0,0 }, length, samples);
@@ -135,7 +136,7 @@ void scene_structure::emit_particle(std::vector<plane_structure>& walls, float d
 
 		particle_structure particle;
 		particle.p = { 0,0,0 };
-		particle.r = 0.1f;//rand_interval(0.08f, 0.16f);
+		particle.r = 0.05f;//rand_interval(0.08f, 0.16f);
 		//particle.c = color_lut[1];
 		particle.v = v;
 		particle.m = rand_interval(1.0f, 2.0f);

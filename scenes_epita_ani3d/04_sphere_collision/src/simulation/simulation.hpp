@@ -53,7 +53,7 @@ private:
     float width_;
     std::vector<particle_structure> boules_;
     std::vector<std::shared_ptr<Node>> children_;
-    int _color_index;
+    cgp::vec3 color_;
     
 
     size_t boules_per_cube_ = 20;

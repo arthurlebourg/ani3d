@@ -6,7 +6,7 @@ Node::Node(cgp::vec3 p, float width)
     : p_(p)
     , center_(p + cgp::vec3(width / 2,width / 2,width / 2))
     , width_(width) 
-    , _color_index(int(rand_interval() * 8))
+    , color_(cgp::vec3(float(rand_interval()),float(rand_interval()),float(rand_interval())))
 {
     children_ = std::vector<std::shared_ptr<Node>>(8, nullptr);
 }
@@ -95,8 +95,6 @@ void Node::add_boule(particle_structure b, std::vector<plane_structure>& walls, 
         if (n < boules_per_cube_)
         {   
             boules_.push_back(b);
-            simulate(boules_, head, walls, dt);
-
             if (n == boules_per_cube_ - 1)
             {
                 for (auto child : boules_)
@@ -169,10 +167,9 @@ std::vector<particle_structure> Node::get_boules(cgp::vec3 pos)
 std::vector<particle_structure> Node::get_boules()
 {
     std::vector<particle_structure> res;
-    static numarray<vec3> const color_lut = { {0,0,0},{0,0,1},{0,1,0},{0,1,1},{1,0,0},{1,0,1},{1,1,0},{1,1,1} };
     for (auto b : boules_)
     {
-        b.c = color_lut[_color_index];
+        b.c = color_;
         res.push_back(b);
     }
     for (auto i : children_)
@@ -258,15 +255,18 @@ void Node::simulate_rec(std::vector<particle_structure>& particles, std::shared_
         return;
     }
 
-    size_t const N = particles.size();
     size_t const M = voisin->boules_.size();
-    for (size_t k = 0; k < N; ++k)
-	{
-		particle_structure& particle = particles[k];
-        for (size_t l = 0; l < M; ++l)
+    if (M > 0)
+    {
+        size_t const N = particles.size();
+        for (size_t k = 0; k < N; ++k)
         {
-            particle_structure& other = voisin->boules_[l];
-            collision_boules(particle, other);
+            particle_structure& particle = particles[k];
+            for (size_t l = 0; l < M; ++l)
+            {
+                particle_structure& other = voisin->boules_[l];
+                collision_boules(particle, other);
+            }
         }
     }
     for (auto i : voisin->children_)
