@@ -278,6 +278,61 @@ void Node::simulate_rec(std::vector<particle_structure>& particles, std::shared_
     }
 }
 
+float Node::get_density(particle_structure particle, std::vector<particle_structure>& voisins)
+{
+    float pi = 0;
+    size_t const J = voisins.size();
+    float h = 0.2;
+    float h9 = std::pow(h, 9);
+    float h2 = h*h;
+    for (size_t j = 0; j < J; ++j)
+    {
+        particle_structure& other = voisins[j];
+        float r2 = (particle.p.x - other.p.x) * (particle.p.x - other.p.x) + (particle.p.y - other.p.y) * (particle.p.y - other.p.y) * (particle.p.z - other.p.z) * (particle.p.z - other.p.z);
+        pi += other.m * (315 / (64*3.14 * h9)) * std::pow(h2 - r2, 3); 
+    }
+    return pi;
+}
+
+void Node::simulate_fluid(std::vector<particle_structure>& particles, std::shared_ptr<Node> voisin, float dt)
+{
+    std::vector<particle_structure> boules_voisines;
+    if (voisin != nullptr)
+    {
+        boules_voisines = voisin->get_boules();
+    }
+    size_t const J = boules_voisines.size();
+    float h = 0.2;
+    float h2 = h*h;
+    float h3 = h*h*h;
+    float h6 = h3*h3;
+    size_t const I = particles.size();
+    for (size_t i = 0; i < I; ++i)
+    {
+        particle_structure& particle = particles[i];
+        float pi = get_density(particle, boules_voisines);
+        float K = 20;
+        float p0 = 20;
+        float P = K * ( pi - p0);
+        float ai = 0;
+        float avi = 0;
+        for (size_t j = 0; j < J; ++j)
+        {
+            particle_structure& other = boules_voisines[j];
+            float r = std::sqrt((particle.p.x - other.p.x) * (particle.p.x - other.p.x) + (particle.p.y - other.p.y) * (particle.p.y - other.p.y) * (particle.p.z - other.p.z) * (particle.p.z - other.p.z));
+            float r2 = r * r;
+            float r3 = r * r * r;
+            ai += (other.m / particle.m) * (P / (pi * get_density(other, boules_voisines))) * (-45 * (h - r)* (h-r))/(3.14*h6) * r2;
+            avi += (other.m / particle.m) * (1 / get_density(other, boules_voisines)) * std::pow( r3 / (2*h3) + r2 / h2 + h / 2*r -1, 2) * r2; 
+        }
+        ai *= -1;
+        avi *= 0.018;
+        particle.v = particle.v + dt * (ai + avi);
+		particle.p = particle.p + dt * particle.v;
+
+    }
+}
+
 void Node::simulate(std::vector<particle_structure>& particles, std::shared_ptr<Node> head, std::vector<plane_structure>& walls, float dt)
 {
 	size_t const N = particles.size();
@@ -320,7 +375,7 @@ void Node::simulate(std::vector<particle_structure>& particles, std::shared_ptr<
             }
         }
 
-        for (size_t i = 0; i < k; ++i)
+        /*for (size_t i = 0; i < k; ++i)
         {
             particle_structure& other = particles[i];
             collision_boules(particle, other);
@@ -329,7 +384,7 @@ void Node::simulate(std::vector<particle_structure>& particles, std::shared_ptr<
         {
             particle_structure& other = particles[i];
             collision_boules(particle, other);
-        }
+        }*/
     }
 
     
@@ -342,9 +397,12 @@ void Node::simulate(std::vector<particle_structure>& particles, std::shared_ptr<
                 if (!(i == 0 && j == 0 && h == 0))
                 {
                     auto neighbor = head->get_voisins(vec3(center_.x +i, center_.y + j, center_.z + h), width_);
-                    simulate_rec(particles, neighbor, walls, dt);
+                    //simulate_rec(particles, neighbor, walls, dt);
+                    simulate_fluid(particles, neighbor, dt);
                 }
             }
         }
     }
 }
+
+

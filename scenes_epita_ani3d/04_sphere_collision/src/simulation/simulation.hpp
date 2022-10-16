@@ -46,6 +46,9 @@ public:
     void simulate_rec(std::vector<particle_structure>& particles, std::shared_ptr<Node> voisin, std::vector<plane_structure>& walls, float dt);
     void simulate(std::vector<particle_structure>& particles, std::shared_ptr<Node> head, std::vector<plane_structure>& walls, float dt);
 
+    float get_density(particle_structure particle, std::vector<particle_structure>& voisins);
+    void simulate_fluid(std::vector<particle_structure>& particles, std::shared_ptr<Node> voisin, float dt);
+
 
 private:
     cgp::vec3 p_;
