@@ -87,12 +87,12 @@ void scene_structure::display_frame()
 	{
 		particles->add_boule(i, walls, dt, particles);
 	}
-	grid_3D<float> field = compute_scalar_field(domain, *particles, sigma);
 
 	// Compute the mesh using marching cube
 	
 	if (gui.marching_cube)
 	{
+		grid_3D<float> field = compute_scalar_field(domain, *particles, sigma);
 		mesh m = marching_cube(field, domain, isovalue);
 		implicit_surface.initialize_data_on_gpu(m);
     	implicit_surface.material.color = {0.83/2,0.94/2,0.97};
